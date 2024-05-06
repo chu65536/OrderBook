@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.29.2)
+
+set(CMAKE_CXX_STANDARD 20)
+
+project(OrderBook)
+
+# wxwidgets build
+set(wxBUILD_SHARED OFF) # building statically
+add_subdirectory(lib/wxwidgets)
+
+add_executable(${PROJECT_NAME} 
+    src/id_manager.cpp
+    src/simple_orderbook.cpp
+    src/order.cpp
+    src/application.cpp
+    src/main_frame.cpp
+)
+
+target_link_libraries(${PROJECT_NAME} wx::net wx::core wx::base)
