@@ -2,7 +2,7 @@
 
 #include <string>
 #include <cstdint>
-#include <queue>
+#include <stack>
 #include <list>
 
 class IdManager
@@ -22,6 +22,6 @@ private:
     const std::list<uint64_t>* GetIdsImpl();
 
     int64_t m_counter{0};
-    std::queue<uint64_t> m_position_queue;
+    std::stack<uint64_t> m_position_stack;
     std::list<uint64_t> ids;
 };

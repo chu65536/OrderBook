@@ -1,52 +1,70 @@
-#include <iostream>
+#include <ranges>
+#include <algorithm>
 
 #include "simple_orderbook.hpp"
-#include "exceptions.hpp"
 #include "id_manager.hpp"
+#include "exceptions.hpp"
 
-uint64_t SimpleOrderBook::Add(const Order& order)
-{   
+SimpleOrderbook::SimpleOrderbook() {}
+
+uint64_t SimpleOrderbook::Add(const Order& order)
+{
     uint64_t id = IdManager::NextId();
-    m_orders[id] = std::make_shared<Order>(order);
-    if (order.type == Order::Type::BUY) m_buying.insert(m_orders[id]);
-    else m_selling.insert(m_orders[id]);
+    m_orders[id] = order;
     return id;
 }
 
-void SimpleOrderBook::Erase(uint64_t id)
+void SimpleOrderbook::Erase(uint64_t id)
 {
-    checkIfExists(id);
-    if (m_orders[id]->type == Order::Type::BUY) m_buying.erase(m_orders[id]);
-    else m_selling.erase(m_orders[id]);
+    if (m_orders.find(id) == m_orders.end()) throw OrderNotFound(std::to_string(id));
     m_orders.erase(id);
     IdManager::RemoveId(id);
 }
 
-Order& SimpleOrderBook::operator[](uint64_t id)
+Order& SimpleOrderbook::operator[](uint64_t id)
 {
-    checkIfExists(id);
-    return *m_orders[id];
+    if (m_orders.find(id) == m_orders.end()) throw OrderNotFound(std::to_string(id));
+    return m_orders[id];
 }
 
-void SimpleOrderBook::Show10Best() const
+std::vector<uint64_t> SimpleOrderbook::GetBuyingOrdersIdSorted() const
 {
-}
-
-void SimpleOrderBook::checkIfExists(uint64_t id)
-{
-    if (!m_orders.contains(id))
-    {   
-        throw OrderNotFound(std::to_string(id));
+    std::vector<std::pair<uint64_t, Order>> buying;
+    for (const auto& [id, order]: m_orders)
+    {
+        if (order.type == Order::Type::BUY) buying.emplace_back(id, order);
     }
+    
+    using P = std::pair<uint64_t, Order>;
+    auto cmp = [](const P& lhs, const P& rhs) 
+    {
+        return lhs.second.price > rhs.second.price;
+    };
+
+    std::ranges::sort(buying, cmp);
+    std::vector<uint64_t> res;
+    res.reserve(buying.size());
+    for (const auto& p: buying) res.emplace_back(p.first);
+    return res;
 }
 
-std::unordered_map<uint64_t, std::shared_ptr<Order>>::iterator SimpleOrderBook::begin()
+std::vector<uint64_t> SimpleOrderbook::GetSellingOrdersIdSorted() const
 {
-    return m_orders.begin();
-}
+    std::vector<std::pair<uint64_t, Order>> selling;
+    for (const auto& [id, order]: m_orders)
+    {
+        if (order.type == Order::Type::SELL) selling.emplace_back(id, order);
+    }
+    
+    using P = std::pair<uint64_t, Order>;
+    auto cmp = [](const P& lhs, const P& rhs) 
+    {
+        return lhs.second.price < rhs.second.price;
+    };
 
-std::unordered_map<uint64_t, std::shared_ptr<Order>>::iterator SimpleOrderBook::end()
-{
-    return m_orders.end();
+    std::ranges::sort(selling, cmp);
+    std::vector<uint64_t> res;
+    res.reserve(selling.size());
+    for (const auto& p: selling) res.emplace_back(p.first);
+    return res;
 }
-

@@ -10,7 +10,8 @@ public:
     virtual uint64_t Add(const Order& order) = 0;
     virtual void Erase(uint64_t id) = 0;
     virtual Order& operator[](uint64_t id) = 0;
-    virtual void Show10Best() const = 0;
+    virtual std::vector<uint64_t> GetBuyingOrdersIdSorted() const = 0;
+    virtual std::vector<uint64_t> GetSellingOrdersIdSorted() const = 0;
 
     virtual ~IOrderBook() = default;
 };

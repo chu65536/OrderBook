@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.29.2)
 
 set(CMAKE_CXX_STANDARD 20)
+# if (WIN32)
+#     add_link_options(-mwindows)
+# endif(WIN32)
 
 project(OrderBook)
 
@@ -11,9 +14,15 @@ add_subdirectory(lib/wxwidgets)
 add_executable(${PROJECT_NAME} 
     src/id_manager.cpp
     src/simple_orderbook.cpp
+    src/standart_orderbook.cpp
     src/order.cpp
     src/application.cpp
     src/main_frame.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} wx::net wx::core wx::base)
+
+# linking precompiled windows visual styles
+if (WIN32)
+    target_link_libraries(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/lib/wx.o)
+endif (WIN32)

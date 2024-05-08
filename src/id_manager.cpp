@@ -1,6 +1,7 @@
 #include "id_manager.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 IdManager& IdManager::GetInstance()
 {
@@ -25,11 +26,15 @@ const std::list<uint64_t>* IdManager::GetIds()
 
 uint64_t IdManager::NextIdImpl()
 {
-    uint64_t result = m_counter++;
-    if (!m_position_queue.empty())
+    uint64_t result = m_counter;
+    if (m_position_stack.empty())
     {
-        m_counter = m_position_queue.front();
-        m_position_queue.pop();
+        m_counter++;
+    }
+    else
+    {
+        m_counter = m_position_stack.top();
+        m_position_stack.pop();
     }
     ids.push_back(result);
     return result;
@@ -37,7 +42,7 @@ uint64_t IdManager::NextIdImpl()
 
 void IdManager::RemoveIdImpl(uint64_t id)
 {
-    m_position_queue.push(m_counter);
+    m_position_stack.push(m_counter);
     m_counter = id;
     ids.erase(std::find(ids.begin(), ids.end(), id));
 }
