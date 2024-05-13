@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.29.2)
 
 set(CMAKE_CXX_STANDARD 20)
-# if (WIN32)
-#     add_link_options(-mwindows)
-# endif(WIN32)
 
 project(OrderBook)
+
+if (WIN32)
+    if (CMAKE_BUILD_TYPE MATCHES Release)
+        add_link_options(-mwindows)
+    endif()
+endif(WIN32)
 
 # wxwidgets build
 set(wxBUILD_SHARED OFF) # building statically

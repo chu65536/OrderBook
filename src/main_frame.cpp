@@ -109,11 +109,16 @@ void MainFrame::updateListViews()
     m_pBuyingListView->DeleteAllItems();
     m_pSellingListView->DeleteAllItems();
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     auto buying = m_pOrder_book->GetBuyingOrdersIdSorted();
     auto selling = m_pOrder_book->GetSellingOrdersIdSorted();
-    int item = 0;
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto stop = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration = stop - start;
+    log("Sorted data", duration.count());
+
+    int item = 0;
     for (auto&& id: buying)
     {
         m_pBuyingListView->InsertItem(item, std::to_string(id));
@@ -130,10 +135,7 @@ void MainFrame::updateListViews()
         item++;
     }
 
-    auto stop = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float> duration = stop - start;
-
-    log("List views updated", duration.count());
+    log("List views updated");
 }
 
 void MainFrame::transferData()
